@@ -1,6 +1,61 @@
 import numpy as np
+import math
 
-#Neuron
+from utils import calculate_abs_error
+
+class SimplePerceptron:
+
+    def __init__(self, X_shape, learning_level, activation_func):
+        self.learning_level = learning_level
+        self.activation_func = activation_func
+        self.X_shape = X_shape
+        self.initialize()
+        self.min_weights = self.neuron.weights 
+        self.min_bias = self.neuron.bias
+        self.min_error = math.inf # X.shape[0] * 2
+
+    def initialize(self):
+        initial_weights = np.random.uniform(-1, 1, self.X_shape)
+        initial_bias = np.random.uniform(-1, 1)
+        self.neuron = Neuron(initial_weights, initial_bias, self.activation_func)
+
+    def train(self, X, y, epsilon=0, limit=100000, max_it_same_bias=1000):
+        i = 0
+        n = 0
+        error = self.min_error
+        while error > epsilon and i < limit:
+            
+            #check if perceptron needs resetting
+            if n > max_it_same_bias * X.shape[0]:
+                self.initialize()
+                n = 0
+                print("Reseting perceptron")
+
+            #choose random input            
+            rand_idx = np.random.randint(0, X.shape[0])
+            rand_X = X[rand_idx, :]
+            rand_y = y[rand_idx]
+
+            #evaluate chosen input
+            activation = self.neuron.evaluate(rand_X)
+            self.neuron.apply_correction(self.learning_level, rand_y, activation, rand_X)
+            
+            #calculate training error
+            error = calculate_abs_error(self.neuron, X, y)
+            
+            if error < self.min_error:
+                self.min_error = error
+                self.min_weights = self.neuron.weights.copy() 
+                self.min_bias = self.neuron.bias
+                print('updated error_min', self.min_error)
+
+            i += 1
+            n += 1
+
+        return i >= limit
+
+    def best_neuron(self):
+        return Neuron(self.min_weights, self.min_bias, self.activation_func)
 
 class Neuron:
 
@@ -28,10 +83,14 @@ class Neuron:
     def evaluate(self, entry):
         #print('Evaluating:', entry)
         #print('Weights:', self.weights)
-        excitation = np.dot(entry, self.weights)
+        excitation = np.inner(entry, self.weights)
         #print(f"\tExcitation: {excitation}")
         activation = self.activation_func(excitation + self.bias)
         #print(f"\tActivation: {activation}")
         return activation
+
+    def print_predictions_with_expected(self, X, y):
+        for i in range(0, X.shape[0]):
+            print(f'X = {X[i,:]} => y = {self.evaluate(X[i,:])} (should return {y[i]})')
 
  
