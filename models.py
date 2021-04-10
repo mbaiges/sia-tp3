@@ -29,7 +29,6 @@ class SimplePerceptron:
             if n > max_it_same_bias * X.shape[0]:
                 self.initialize()
                 n = 0
-                print("Reseting perceptron")
 
             #choose random input            
             rand_idx = np.random.randint(0, X.shape[0])
@@ -47,7 +46,7 @@ class SimplePerceptron:
                 self.min_error = error
                 self.min_weights = self.neuron.weights.copy() 
                 self.min_bias = self.neuron.bias
-                print('updated error_min', self.min_error)
+                print('updated min_error', self.min_error)
 
             i += 1
             n += 1
@@ -88,9 +87,3 @@ class Neuron:
         activation = self.activation_func(excitation + self.bias)
         #print(f"\tActivation: {activation}")
         return activation
-
-    def print_predictions_with_expected(self, X, y):
-        for i in range(0, X.shape[0]):
-            print(f'X = {X[i,:]} => y = {self.evaluate(X[i,:])} (should return {y[i]})')
-
- 

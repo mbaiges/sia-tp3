@@ -37,3 +37,7 @@ def calculate_standard_deviation(neuron, X, y):
     stdev /= X.shape[0]
     stdev = math.sqrt(stdev)
     return stdev
+
+def print_predictions_with_expected(neuron, X, y):
+    for i in range(0, X.shape[0]):
+        print(f'X = {X[i,:]} => y = {neuron.evaluate(X[i,:])} (should return {y[i]})')

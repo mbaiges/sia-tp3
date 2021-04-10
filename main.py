@@ -1,116 +1,91 @@
-import numpy as np
-import math
-import json
-import os
-import shutil
+from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting
 
-from models import Neuron, SimplePerceptron
-from utils import import_and_parse_data, calculate_abs_error, calculate_mean_error, calculate_standard_deviation
-from activation_funcs import sign_activation, tanh_activation, lineal_activation
+exercises = {
+    'ej1': [
+        {
+            'name': 'AND',
+            'exercise': Ej1And
+        },
+        {
+            'name': 'XOR',
+            'exercise': Ej1Xor
+        }
+    ],
+    'ej2': [
+        {
+            'name': 'Lineal',
+            'exercise': Ej2Lineal
+        },
+        {
+            'name': 'No Lineal',
+            'exercise': Ej2NoLineal
+        },
+        {
+            'name': 'No Lineal With Testing',
+            'exercise': Ej2NoLinealWithTesting
+        }
+    ]
+}
 
-weights_folder_path = 'weights'
-ej1_model_filename = 'ej1_model.json'
-
-ej2_training = "data/ej2-Conjuntoentrenamiento.txt"
-ej2_outputs = "data/ej2-Salida-deseada.txt"
-
-LIMIT = 5000000
+def error():
+	print('Not a valid entry. Please try again')
 
 if __name__ == "__main__":
 
-    weights = {}
-    learning_level = 0.03
-    
-    #EJ 1 ------------------------------------------------
+    # prompt for Exercise selection
 
-    # and
-    X = np.array([
-        [-1, 1],
-        [1, -1],
-        [-1, -1],
-        [1, 1]
-    ])
+    ex_selected = False
 
-    y = np.array([-1, -1, -1, 1])
-    
-    # xor (no se puede)
-    # X = np.array([
-    #     [-1, 1],
-    #     [1, -1],
-    #     [-1, -1],
-    #     [1, 1]
-    # ])
+    while not ex_selected or not (ex_chosen >= 1 and ex_chosen <= len(exercises.keys())):
+        if (ex_selected):
+            error()
+        else:
+            ex_selected = True
+        print("All exercises:")
+        ex_idx = 0
+        for exercise in exercises.keys():
+            ex_idx += 1
+            print("%s - %s" % (f'{ex_idx:03}', exercise) )
 
-    # y = np.array([1, 1, -1, -1])
+        try:
+            ex_chosen = int(input("Please select an exercise: "))
+        except ValueError:
+            ex_chosen = -1
 
+    # determine exercise
+    ex_chosen -= 1
 
-    #EJ 2 ------------------------------------------------
-    # X = import_and_parse_data(ej2_training)
-    # y = import_and_parse_data(ej2_outputs)
-    
-    #initialize perceptron
-    simple_perceptron = SimplePerceptron(X.shape[1], learning_level, sign_activation)
+    sub_exercises = list(exercises.values())[ex_chosen]
 
-    #train perceptron
-    result = simple_perceptron.train(X, y)
+    sub_chosen = 0
 
-    if result:
-        print("------------> LIMIT passed")
+    if len(sub_exercises) > 1:
+        # prompt for Exercise selection
+
+        sub_selected = False
+
+        while not sub_selected or not (sub_chosen >= 1 and sub_chosen <= len(sub_exercises)):
+            if (sub_selected):
+                error()
+            else:
+                sub_selected = True
+            print("All exercises:")
+            sub_idx = 0
+            for sub in sub_exercises:
+                sub_idx += 1
+                print("%s - %s" % (f'{sub_idx:03}', sub['name']) )
+
+            try:
+                sub_chosen = int(input("Please select a sub exercise: "))
+            except ValueError:
+                sub_chosen = -1
+
+        # determine sub exercise
+        sub_chosen -= 1
         
-    print("Finished")
+    sub_exercise = sub_exercises[sub_chosen]
 
-    best_neuron = simple_perceptron.best_neuron()
+    print(sub_exercise['name'])
 
-    abs_error = simple_perceptron.min_error
-    mean_error = calculate_mean_error(best_neuron, X, y)
-    standard_deviation = calculate_standard_deviation(best_neuron, X, y)
-
-    print(f"min_error: {abs_error}")
-    print(f"mean_error: {mean_error}")
-    print(f"standard_deviation: {standard_deviation}")
-
-    print(f'min_weights: {simple_perceptron.min_weights}')
-    print(f'min_bias: {simple_perceptron.min_bias}')
-
-    best_neuron.print_predictions_with_expected(X, y)
-
-    if not (os.path.exists(weights_folder_path) and os.path.isdir(weights_folder_path)):
-        os.mkdir(weights_folder_path)
-
-    def to_float(e):
-        return float(e)
-
-    min_weights_l = best_neuron.weights.tolist()
-    map(to_float, min_weights_l)
-
-    results = {
-        'and': {
-            'weights': min_weights_l,
-            'bias': float(best_neuron.bias),
-            'training': {
-                'abs_error': float(abs_error),
-                'mean_error': float(mean_error),
-                'standard_deviation': float(standard_deviation),
-            }
-        }
-        # # Arreglar
-        # 'xor': {
-        #     'weights': w_min,
-        #     'bias': b_min,
-        #     'training': {
-        #         'error': error_min
-        #     }
-        # }
-    }
-
-    print(f'Results: {results}')
-
-    filename = os.path.join(weights_folder_path, ej1_model_filename)
-
-    with open(filename, 'w') as outfile:
-        json.dump(results, outfile)
-        print(f"Model saved: '{filename}'")
-
-        
-    print('Weights:', best_neuron.weights)
-    print('Bias:', best_neuron.bias)
+    ej = sub_exercise['exercise']()
+    ej.train_and_test()
