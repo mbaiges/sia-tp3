@@ -133,7 +133,7 @@ class SimplePerceptronExerciseTemplate(Exercise):
         if X_test.shape[0] > 0:
             print("Started testing")
             testing_results = self.get_analysis_results(simple_perceptron, X_test, y_test)
-            print("Finished training")
+            print("Finished testing")
 
         results = self.build_results(simple_perceptron, training_results, testing_results)
 
