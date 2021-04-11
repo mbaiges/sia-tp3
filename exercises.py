@@ -117,12 +117,13 @@ class SimplePerceptronExerciseTemplate(Exercise):
         simple_perceptron = SimplePerceptron(X_train.shape[1], self.training_level, self.activation_func)
 
         # train perceptron
+        print("Started training")
         result = simple_perceptron.train(X_train, y_train)
 
         if result:
             print(f"LIMIT ({self.limit}) passed")
             
-        print("Finished")
+        print("Finished training")
 
         training_results = self.get_analysis_results(simple_perceptron, X_train, y_train)
 
@@ -130,7 +131,9 @@ class SimplePerceptronExerciseTemplate(Exercise):
         testing_results = None
 
         if X_test.shape[0] > 0:
+            print("Started testing")
             testing_results = self.get_analysis_results(simple_perceptron, X_test, y_test)
+            print("Finished training")
 
         results = self.build_results(simple_perceptron, training_results, testing_results)
 
