@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 error()
             else:
                 sub_selected = True
-            print("All exercises:")
+            print("All sub exercises:")
             sub_idx = 0
             for sub in sub_exercises:
                 sub_idx += 1

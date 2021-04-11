@@ -164,7 +164,7 @@ class Ej1And(SimplePerceptronExerciseTemplate):
 class Ej1Xor(SimplePerceptronExerciseTemplate):
 
     def __init__(self):
-        super().__init__(sign_activation, 100000, 10000, 0.01, ej1_xor_filename)
+        super().__init__(sign_activation, 0, 100000, 10000, 0.01, ej1_xor_filename)
 
     def get_data(self):
         X = np.array([
