@@ -182,7 +182,7 @@ class SimplePerceptronExerciseTemplate(PerceptronExerciseTemplate):
 
             while selected_X is None or len(selected_X) != X_shape:
                 if selected_X:
-                    print("Error: Invalid X shape")
+                    print(f"Error: Invalid X shape (expected: {X_shape})")
 
                 inp = input("Select an entry (Example: [ 0.2, 0.3 ]): ")
                 selected_X = ast.literal_eval(inp)

@@ -101,7 +101,7 @@ if __name__ == "__main__":
     action_selected = ''
 
     while action_selected != 'train' and action_selected != 'predict':
-        action_selected = input("Select an action [train | predict]: ").lower()
+        action_selected = input("Select an action [train|predict]: ").lower()
 
     ej = sub_exercise['exercise']()
 
