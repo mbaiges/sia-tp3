@@ -31,7 +31,7 @@ ej2_outputs = "data/ej2-Salida-deseada.txt"
 
 class Exercise:
 
-    def train(self):
+    def train_and_test(self):
         pass
 
     def predict(self):
@@ -67,12 +67,9 @@ class SimplePerceptronExerciseTemplate(Exercise):
 
     def build_results(self, perceptron, training_results, testing_results):
         best_neuron = perceptron.best_neuron()  
-    
-        def to_float(e):
-            return float(e)
 
         min_weights_l = best_neuron.weights.tolist()
-        map(to_float, min_weights_l)
+        map(lambda e: float(e), min_weights_l)
 
         results = {
             'weights': min_weights_l,
@@ -190,6 +187,10 @@ class Ej2(SimplePerceptronExerciseTemplate):
     def get_data(self):
         X = import_and_parse_data(ej2_training)
         y = import_and_parse_data(ej2_outputs)
+
+        y_max = reduce(lambda (a, b): b if a is None or b > a else a, list(y))
+
+        print(y_max)
 
         return X, y, np.array([]), np.array([])
 
