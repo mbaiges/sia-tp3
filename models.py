@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import copy
 
 from utils import calculate_abs_error
 
@@ -46,6 +47,63 @@ class SimplePerceptron:
                 self.min_error = error
                 self.min_weights = self.neuron.weights.copy() 
                 self.min_bias = self.neuron.bias
+                #print('updated min_error', self.min_error)
+
+            i += 1
+            n += 1
+
+        return i >= limit
+
+    def get_best_model(self):
+        return Neuron(self.min_weights, self.min_bias, self.activation_func)
+
+class MultilayerPerceptron:
+
+    def __init__(self, hidden_layers, X_shape, Y_shape, learning_level, activation_func, dx_activation_func):
+        self.hidden_layers = hidden_layers
+        self.X_shape = X_shape
+        self.Y_shape = Y_shape
+        self.learning_level = learning_level
+        self.activation_func = activation_func
+        self.dx_activation_func = dx_activation_func
+        self.initialize()
+        # self.min_weights = self.neuron.weights 
+        # self.min_bias = self.neuron.bias
+        self.min_error = math.inf # X.shape[0] * 2
+
+    def initialize(self):
+        self.neural_network = NeuralNetwork(self.hidden_layers, self.X_shape, self.Y_shape, self.activation_func, self.dx_activation_func)
+
+    def train(self, X, Y, epsilon=0, limit=100000, max_it_same_bias=1000):
+        i = 0
+        n = 0
+        error = self.min_error
+        while error > epsilon and i < limit:
+            
+            #check if perceptron needs resetting
+            if n > max_it_same_bias * X.shape[0]:
+                self.initialize()
+                n = 0
+
+            #choose random input            
+            rand_idx = np.random.randint(0, X.shape[0])
+            rand_X = X[rand_idx, :]
+            rand_Y = Y[rand_idx]
+
+            #print("holaaa1")
+            #evaluate chosen input
+            activation = self.neural_network.evaluate(rand_X)
+            self.neural_network.apply_correction(self.learning_level, rand_Y, activation, rand_X)
+           # print("holaaa2")
+            #calculate training error
+            error = calculate_abs_error(self.neural_network, X, Y)
+            #print(f"Current error: {error}")
+            
+            if error < self.min_error:
+                self.min_error = error
+                self.best_model = copy.deepcopy(self.neural_network)
+                # self.min_weights = self.neuron.weights.copy() 
+                # self.min_bias = self.neuron.bias
                 print('updated min_error', self.min_error)
 
             i += 1
@@ -53,8 +111,8 @@ class SimplePerceptron:
 
         return i >= limit
 
-    def best_neuron(self):
-        return Neuron(self.min_weights, self.min_bias, self.activation_func)
+    def get_best_model(self):
+        return self.best_model
 
 class Neuron:
 
@@ -87,3 +145,120 @@ class Neuron:
         activation = self.activation_func(excitation + self.bias)
         #print(f"\tActivation: {activation}")
         return activation
+
+class NetworkNeuron:
+
+    def __init__(self, weights, bias, activation_func):
+        self.weights = weights
+        self.bias = bias
+        self.activation_func = activation_func
+        
+    def apply_correction(self, learning_level, entry, delta): 
+        self.last_delta = delta
+        correction = learning_level * delta
+        #print(f"Correction: {correction}")
+        delta_weights = correction * entry
+        delta_bias = correction
+        #print(f"weights before: {self.weights}")
+        self.weights += delta_weights
+        self.bias += delta_bias
+        #print(f"weights after: {self.weights}")
+        
+    def evaluate(self, entry):
+        excitation = np.inner(entry, self.weights)
+        self.last_excitation = excitation
+        activation = self.activation_func(excitation + self.bias)
+        self.last_activation = activation
+        return activation
+
+
+class NeuralNetwork:
+
+    def __init__(self, hidden_layers, X_shape, Y_shape, activation_func, dx_activation_func):
+        self.hidden_layers = hidden_layers
+        self.X_shape = X_shape
+        self.Y_shape = Y_shape
+        self.activation_func = activation_func
+        self.dx_activation_func = dx_activation_func
+        self.network = self.create_network()
+
+    # def get_weights_with_bias(self):
+    #     w = [self.bias]
+    #     w.extend(self.weights)
+    #     return np.asarray(w)
+
+    def create_network(self):
+
+        net = []
+        
+        for i in range(0, len(self.hidden_layers)):
+            net.append([])
+            for j in range(0, self.hidden_layers[i]):
+                weights_len = self.X_shape
+                if i > 0:
+                    weights_len = self.hidden_layers[i-1]
+                initial_weights = np.random.uniform(-1, 1, weights_len)
+                initial_bias = np.random.uniform(-1, 1)
+                new_neuron = NetworkNeuron(initial_weights, initial_bias, self.activation_func)
+                net[i].append(new_neuron)
+
+        last_layer = []
+
+        for k in range(0, self.Y_shape):
+            weights_len = self.hidden_layers[-1]
+            initial_weights = np.random.uniform(-1, 1, weights_len)
+            initial_bias = np.random.uniform(-1, 1)
+            new_neuron = NetworkNeuron(initial_weights, initial_bias, self.activation_func)
+            last_layer.append(new_neuron)
+
+        net.append(last_layer)
+
+        print(net)
+
+        return net
+            
+    # backpropagation
+    def apply_correction(self, learning_level, expected_result, result, entry):
+        #print("backpropagation")
+        for l in range(0, len(self.network)):
+            i = len(self.network)-1 - l
+            #print("for i")
+            if i == 0:
+                entries = entry
+            else:
+                entries = np.array([n.last_activation for n in self.network[i-1]])
+
+            for j in range(0, len(self.network[i])):
+                #print("for j")
+                neuron = self.network[i][j]
+                if i == len(self.network) - 1:
+                    delta = (expected_result - result) * self.dx_activation_func(neuron.last_excitation)
+                else:
+                    result = 0
+                    for k in range(0, len(self.network[i+1])):
+                        parent_neuron = self.network[i+1][k]
+                        result += parent_neuron.weights[j] * parent_neuron.last_delta
+                    delta = self.dx_activation_func(neuron.last_excitation) * result
+
+                
+                self.network[i][j].apply_correction(learning_level, entries, delta)
+        
+    def evaluate(self, entry):
+        #print("evaluating")
+        entries = entry
+        for i in range(0, len(self.network)):
+            if i > 0:
+                entries = np.array([n.last_activation for n in self.network[i-1]])
+            for j in range(0, len(self.network[i])):
+                neuron = self.network[i][j]
+                neuron.evaluate(entries)
+
+        result = np.array([n.last_activation for n in self.network[-1]])
+
+        if result.shape[0] == 1:
+            result = result[0]
+        
+        # print(entry)
+        # print(result)
+        
+        return result

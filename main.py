@@ -1,4 +1,4 @@
-from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting
+from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting, Ej3Xor, Ej3Pair
 
 exercises = {
     'ej1': [
@@ -24,7 +24,18 @@ exercises = {
             'name': 'No Lineal With Testing',
             'exercise': Ej2NoLinealWithTesting
         }
-    ]
+    ],
+    'ej3': [
+        {
+            'name': 'XOR',
+            'exercise': Ej3Xor
+        },
+        {
+            'name': 'Pair',
+            'exercise': Ej3Pair
+        },
+        
+    ],
 }
 
 def error():
@@ -87,5 +98,14 @@ if __name__ == "__main__":
 
     print(sub_exercise['name'])
 
+    action_selected = ''
+
+    while action_selected != 'train' and action_selected != 'predict':
+        action_selected = input("Select an action [train | predict]: ").lower()
+
     ej = sub_exercise['exercise']()
-    ej.train_and_test()
+
+    if action_selected == 'train':
+        ej.train_and_test()
+    else:
+        ej.predict()
