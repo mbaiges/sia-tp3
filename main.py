@@ -1,3 +1,6 @@
+import signal
+import sys
+
 from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting, Ej3Xor, Ej3Pair
 
 exercises = {
@@ -41,7 +44,13 @@ exercises = {
 def error():
 	print('Not a valid entry. Please try again')
 
+def sigint_handler(sig, frame):
+    print('\nExiting')
+    sys.exit(0)
+
 if __name__ == "__main__":
+    # sets SIGINT handler
+    signal.signal(signal.SIGINT, sigint_handler)
 
     # prompt for Exercise selection
 
@@ -98,14 +107,40 @@ if __name__ == "__main__":
 
     print(sub_exercise['name'])
 
-    action_selected = ''
-
-    while action_selected != 'train' and action_selected != 'predict':
-        action_selected = input("Select an action [train|predict]: ").lower()
-
     ej = sub_exercise['exercise']()
 
-    if action_selected == 'train':
-        ej.train_and_test()
-    else:
-        ej.predict()
+    actions = [
+        {
+            'name': 'Train and Test',
+            'func': ej.train_and_test
+        },
+        {
+            'name': 'Predict',
+            'func': ej.predict
+        }
+    ]
+
+    action_selected = False
+
+    while not action_selected or not (action_chosen >= 1 and action_chosen <= len(actions)):
+        if (action_selected):
+            error()
+        else:
+            action_selected = True
+        print("All actions:")
+        action_idx = 0
+        for action in actions:
+            action_idx += 1
+            print("%s - %s" % (f'{action_idx:03}', action['name']) )
+
+        try:
+            action_chosen = int(input("Please select an action: "))
+        except ValueError:
+            action_chosen = -1
+
+    # determine exercise
+    action_chosen -= 1
+
+    action = actions[action_chosen]['func']
+
+    action()

@@ -4,8 +4,9 @@ import json
 import os
 import shutil
 import ast
+import re
 
-from models import Neuron, SimplePerceptron, MultilayerPerceptron
+from models import Neuron, NeuralNetwork, SimplePerceptron, MultilayerPerceptron
 from utils import import_and_parse_data, import_and_parse_numbers, calculate_abs_error, calculate_mean_error, calculate_standard_deviation, print_predictions_with_expected
 from activation_funcs import sign_activation, lineal_activation, tanh_activation, dx_sign_activation, dx_lineal_activation, dx_tanh_activation
 
@@ -81,12 +82,21 @@ class PerceptronExerciseTemplate(Exercise):
     def build_results(self, perceptron, training_results, testing_results):
         best_model = perceptron.get_best_model()  
 
-        min_weights_l = best_model.weights.tolist()
-        map(lambda e: float(e), min_weights_l)
+        weights_and_bias = best_model.get_weights_and_bias()
+
+        if isinstance(weights_and_bias, list):
+            for i in range(0, len(weights_and_bias)):
+                for j in range(0, len(weights_and_bias[i])):
+                    weights_and_bias[i][j]['weights'] = weights_and_bias[i][j]['weights'].tolist()
+                    map(lambda e: float(e), weights_and_bias[i][j]['weights'])
+                    weights_and_bias[i][j]['bias'] = float(weights_and_bias[i][j]['bias'])
+        else:
+            weights_and_bias['weights'] = weights_and_bias['weights'].tolist()
+            map(lambda e: float(e), weights_and_bias['weights'])
+            weights_and_bias['bias'] = float(weights_and_bias['bias'])
 
         results = {
-            'weights': min_weights_l,
-            'bias': float(best_model.bias),
+            'configuration': weights_and_bias,
             'training': {
                 'params': {
                     'epsilon': self.epsilon,
@@ -126,6 +136,42 @@ class PerceptronExerciseTemplate(Exercise):
 
         with open(filename) as json_file:
             return json.load(json_file)
+
+    def interactive_predict(self, model, X_shape):
+        predicted = False
+        wants_to_keep_predicting = True
+
+        while not predicted or wants_to_keep_predicting:
+
+            selected_X = None
+            error = False
+
+            while wants_to_keep_predicting and (selected_X is None or error or len(selected_X) != X_shape):
+                if error:
+                    error = False
+                    print("Error: Invalid input")
+                if not (selected_X is None or error) and (selected_X) != X_shape:
+                    selected_X = None
+                    print(f"Error: Invalid X shape (expected: {X_shape})")
+
+                inp = input("Select an entry (Example: [ 0.2, 0.3 ]): ").strip()
+                wants_to_keep_predicting = False if inp == '' else True
+
+                if wants_to_keep_predicting:
+                    if re.match('^\[[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*(,[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*)*\]$', inp):
+                        try:
+                            selected_X = ast.literal_eval(inp)
+                            error = False if isinstance(selected_X, list) else True
+                        except ValueError:
+                            error = True
+                    else:
+                        error = True
+
+            if wants_to_keep_predicting:
+                print(f"Evaluating {selected_X}")
+                print(f"Returned {model.evaluate(selected_X)}")
+            
+            predicted = True
 
     # predict output based on saved model
     def predict(self):
@@ -169,33 +215,13 @@ class SimplePerceptronExerciseTemplate(PerceptronExerciseTemplate):
 
     def predict(self):
         last_results = self.read_last_results()
+        configuration = last_results['configuration']
 
-        neuron = Neuron(last_results['weights'], last_results['bias'], self.activation_func)
+        neuron = Neuron(configuration['weights'], configuration['bias'], self.activation_func)
 
-        X_shape = len(last_results['weights'])
+        X_shape = len(configuration['weights'])
 
-        predicted = False
-
-        while not predicted or wants_to_keep_predicting:
-
-            selected_X = None
-
-            while selected_X is None or len(selected_X) != X_shape:
-                if selected_X:
-                    print(f"Error: Invalid X shape (expected: {X_shape})")
-
-                inp = input("Select an entry (Example: [ 0.2, 0.3 ]): ")
-                selected_X = ast.literal_eval(inp)
-
-            print(f"Evaluating {selected_X}")
-
-            print(f"Returned {neuron.evaluate(selected_X)}")
-
-            predicted = True
-
-            inp = input("Do you want to keep predicting? [y|n]: ").lower()
-
-            wants_to_keep_predicting = True if inp == 'y' else False
+        self.interactive_predict(neuron, X_shape)
 
 
 class MultilayerPerceptronExerciseTemplate(PerceptronExerciseTemplate):
@@ -204,24 +230,6 @@ class MultilayerPerceptronExerciseTemplate(PerceptronExerciseTemplate):
         super().__init__(activation_func, epsilon, limit, max_it_same_bias, training_level, filename)
         self.dx_activation_func = dx_activation_func
         self.hidden_layers = hidden_layers # las layers vienen en la forma [a, b, c, d...] donde cada letra representa las neuronas de cada capa
-
-    def build_results(self, perceptron, training_results, testing_results):
-        results = {
-            'training': {
-                'params': {
-                    'epsilon': self.epsilon,
-                    'limit': self.limit,
-                    'max_it_same_bias': self.max_it_same_bias,
-                    'training_level': self.training_level
-                },
-                'analysis': training_results
-            }
-        }
-
-        if not testing_results is None:
-            results['testing'] = { 'analysis': testing_results }
-
-        return results
 
     # get new weights with a new training
     def train_and_test(self):
@@ -256,6 +264,19 @@ class MultilayerPerceptronExerciseTemplate(PerceptronExerciseTemplate):
         print(results_printing)
 
         self.save_results(results)
+
+    def predict(self):
+        last_results = self.read_last_results()
+
+        configuration = last_results['configuration']
+
+        
+        X_shape = len(configuration[0][0]['weights'])
+        Y_shape = len(configuration[-1])
+
+        network = NeuralNetwork(configuration, self.hidden_layers, X_shape, Y_shape, self.activation_func, self.dx_activation_func)
+
+        self.interactive_predict(network, X_shape)
 
 
 class Ej1And(SimplePerceptronExerciseTemplate):

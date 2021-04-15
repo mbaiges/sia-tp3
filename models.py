@@ -1,6 +1,5 @@
 import numpy as np
 import math
-import copy
 
 from utils import calculate_abs_error
 
@@ -11,9 +10,8 @@ class SimplePerceptron:
         self.activation_func = activation_func
         self.X_shape = X_shape
         self.initialize()
-        self.min_weights = self.neuron.weights 
-        self.min_bias = self.neuron.bias
-        self.min_error = math.inf # X.shape[0] * 2
+        self.min_weights_and_bias = self.neuron.get_weights_and_bias()
+        self.min_error = math.inf
 
     def initialize(self):
         initial_weights = np.random.uniform(-1, 1, self.X_shape)
@@ -45,9 +43,8 @@ class SimplePerceptron:
             
             if error < self.min_error:
                 self.min_error = error
-                self.min_weights = self.neuron.weights.copy() 
-                self.min_bias = self.neuron.bias
-                #print('updated min_error', self.min_error)
+                self.min_weights_and_bias = self.neuron.get_weights_and_bias()
+                print('updated min_error', self.min_error)
 
             i += 1
             n += 1
@@ -55,7 +52,7 @@ class SimplePerceptron:
         return i >= limit
 
     def get_best_model(self):
-        return Neuron(self.min_weights, self.min_bias, self.activation_func)
+        return Neuron(self.min_weights_and_bias['weights'], self.min_weights_and_bias['bias'], self.activation_func)
 
 class MultilayerPerceptron:
 
@@ -67,9 +64,8 @@ class MultilayerPerceptron:
         self.activation_func = activation_func
         self.dx_activation_func = dx_activation_func
         self.initialize()
-        # self.min_weights = self.neuron.weights 
-        # self.min_bias = self.neuron.bias
-        self.min_error = math.inf # X.shape[0] * 2
+        self.min_weights_and_bias = self.neural_network.get_weights_and_bias()
+        self.min_error = math.inf
 
     def initialize(self):
         self.neural_network = NeuralNetwork(self.hidden_layers, self.X_shape, self.Y_shape, self.activation_func, self.dx_activation_func)
@@ -101,9 +97,7 @@ class MultilayerPerceptron:
             
             if error < self.min_error:
                 self.min_error = error
-                self.best_model = copy.deepcopy(self.neural_network)
-                # self.min_weights = self.neuron.weights.copy() 
-                # self.min_bias = self.neuron.bias
+                self.min_weights_and_bias = self.neural_network.get_weights_and_bias()
                 print('updated min_error', self.min_error)
 
             i += 1
@@ -112,7 +106,7 @@ class MultilayerPerceptron:
         return i >= limit
 
     def get_best_model(self):
-        return self.best_model
+        return NeuralNetwork(self.min_weights_and_bias, self.hidden_layers, self.X_shape, self.Y_shape, self.activation_func, self.dx_activation_func)
 
 class Neuron:
 
@@ -120,11 +114,6 @@ class Neuron:
         self.weights = weights
         self.bias = bias
         self.activation_func = activation_func
-
-    # def get_weights_with_bias(self):
-    #     w = [self.bias]
-    #     w.extend(self.weights)
-    #     return np.asarray(w)
 
     def apply_correction(self, learning_level, expected_result, result, entry):
         correction = learning_level * (expected_result - result)
@@ -146,6 +135,12 @@ class Neuron:
         #print(f"\tActivation: {activation}")
         return activation
 
+    def get_weights_and_bias(self):
+        return {
+            'weights': self.weights.copy(),
+            'bias': self.bias
+        }
+
 class NetworkNeuron:
 
     def __init__(self, weights, bias, activation_func):
@@ -156,13 +151,10 @@ class NetworkNeuron:
     def apply_correction(self, learning_level, entry, delta): 
         self.last_delta = delta
         correction = learning_level * delta
-        #print(f"Correction: {correction}")
         delta_weights = correction * entry
         delta_bias = correction
-        #print(f"weights before: {self.weights}")
         self.weights += delta_weights
         self.bias += delta_bias
-        #print(f"weights after: {self.weights}")
         
     def evaluate(self, entry):
         excitation = np.inner(entry, self.weights)
@@ -174,7 +166,16 @@ class NetworkNeuron:
 
 class NeuralNetwork:
 
-    def __init__(self, hidden_layers, X_shape, Y_shape, activation_func, dx_activation_func):
+    def __init__(self, *args):
+
+        if len(args) == 5:
+            self.__init__1(args[0], args[1], args[2], args[3], args[4])
+        else:
+            self.__init__2(args[0], args[1], args[2], args[3], args[4], args[5])
+
+    def __init__1(self, hidden_layers, X_shape, Y_shape, activation_func, dx_activation_func):
+        print(hidden_layers)
+        print(X_shape)
         self.hidden_layers = hidden_layers
         self.X_shape = X_shape
         self.Y_shape = Y_shape
@@ -182,10 +183,41 @@ class NeuralNetwork:
         self.dx_activation_func = dx_activation_func
         self.network = self.create_network()
 
-    # def get_weights_with_bias(self):
-    #     w = [self.bias]
-    #     w.extend(self.weights)
-    #     return np.asarray(w)
+    def __init__2(self, weights_and_bias, hidden_layers, X_shape, Y_shape, activation_func, dx_activation_func):
+        self.hidden_layers = hidden_layers
+        self.X_shape = X_shape
+        self.Y_shape = Y_shape
+        self.activation_func = activation_func
+        self.dx_activation_func = dx_activation_func
+        self.network = self.create_network_with_weights_and_bias(weights_and_bias)
+
+    def create_network_with_weights_and_bias(self, weights_and_bias):
+
+        net = []
+        
+        for i in range(0, len(self.hidden_layers)):
+            net.append([])
+            for j in range(0, self.hidden_layers[i]):
+                weights_len = self.X_shape
+                if i > 0:
+                    weights_len = self.hidden_layers[i-1]
+                initial_weights = weights_and_bias[i][j]['weights']
+                initial_bias = weights_and_bias[i][j]['bias']
+                new_neuron = NetworkNeuron(initial_weights, initial_bias, self.activation_func)
+                net[i].append(new_neuron)
+
+        last_layer = []
+
+        for k in range(0, self.Y_shape):
+            weights_len = self.hidden_layers[-1]
+            initial_weights = weights_and_bias[-1][k]['weights']
+            initial_bias = weights_and_bias[-1][k]['bias']
+            new_neuron = NetworkNeuron(initial_weights, initial_bias, self.activation_func)
+            last_layer.append(new_neuron)
+
+        net.append(last_layer)
+
+        return net
 
     def create_network(self):
 
@@ -213,23 +245,18 @@ class NeuralNetwork:
 
         net.append(last_layer)
 
-        print(net)
-
         return net
             
     # backpropagation
     def apply_correction(self, learning_level, expected_result, result, entry):
-        #print("backpropagation")
         for l in range(0, len(self.network)):
             i = len(self.network)-1 - l
-            #print("for i")
             if i == 0:
                 entries = entry
             else:
                 entries = np.array([n.last_activation for n in self.network[i-1]])
 
             for j in range(0, len(self.network[i])):
-                #print("for j")
                 neuron = self.network[i][j]
                 if i == len(self.network) - 1:
                     delta = (expected_result - result) * self.dx_activation_func(neuron.last_excitation)
@@ -244,7 +271,6 @@ class NeuralNetwork:
                 self.network[i][j].apply_correction(learning_level, entries, delta)
         
     def evaluate(self, entry):
-        #print("evaluating")
         entries = entry
         for i in range(0, len(self.network)):
             if i > 0:
@@ -258,7 +284,19 @@ class NeuralNetwork:
         if result.shape[0] == 1:
             result = result[0]
         
-        # print(entry)
-        # print(result)
-        
         return result
+
+    def get_weights_and_bias(self):
+
+        wab = []
+
+        for i in range(0, len(self.network)):
+            wab.append([])
+            for j in range(0, len(self.network[i])):
+                neuron = self.network[i][j]
+                wab[i].append({
+                    'weights': neuron.weights.copy(),
+                    'bias': neuron.bias
+                })
+
+        return wab

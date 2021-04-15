@@ -10,7 +10,7 @@ def import_and_parse_data(file):
         clean_row = [float(a) for a in row if a != '']
         if len(clean_row) == 1:
             data.append(clean_row[0]) 
-        else:
+        elif len(clean_row) > 1:
             data.append(clean_row)   
     return np.array(data)
 
