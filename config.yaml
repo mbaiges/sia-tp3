@@ -1,0 +1,13 @@
+
+# data folder
+
+data_folder: data
+
+# data files
+
+# ej2
+ej2_training: ej2-Conjuntoentrenamiento.txt
+ej2_outputs: ej2-Salida-deseada.txt
+
+# ej3
+ej3_pair_training: ej3-mapa-de-pixeles-digitos-decimales.txt

@@ -5,6 +5,7 @@ import os
 import shutil
 import ast
 import re
+import yaml
 
 from models import Neuron, NeuralNetwork, SimplePerceptron, MultilayerPerceptron
 from utils import import_and_parse_data, import_and_parse_numbers, calculate_abs_error, calculate_mean_error, calculate_standard_deviation, print_predictions_with_expected
@@ -29,8 +30,8 @@ ej2_no_lineal_with_testing_filename = 'ej2_no_lineal_with_testing.json'
 
 ## data filenames
 
-ej2_training = "data/ej2-Conjuntoentrenamiento.txt"
-ej2_outputs = "data/ej2-Salida-deseada.txt"
+ej2_training = ""
+ej2_outputs = ""
 
 # Ej3
 
@@ -41,7 +42,19 @@ ej3_pair_filename = 'ej3_pair.json'
 
 ## data filenames
 
-ej3_pair_training = "data/ej3-mapa-de-pixeles-digitos-decimales.txt"
+ej3_pair_training = ""
+
+config_filename = 'config.yaml'
+
+with open(config_filename) as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
+
+    data_folder = config['data_folder']
+
+    ej2_training = os.path.join(data_folder, config['ej2_training'])
+    ej2_outputs = os.path.join(data_folder, config['ej2_outputs'])
+
+    ej3_pair_training = os.path.join(data_folder, config['ej3_pair_training'])
 
 class Exercise:
 
