@@ -66,10 +66,10 @@ class Exercise:
     
 class PerceptronExerciseTemplate(Exercise):
 
-    def __init__(self, activation_func, epsilon, limit, max_it_same_bias, training_level, filename):
+    def __init__(self, activation_func, epsilon, epochs, max_it_same_bias, training_level, filename):
         self.activation_func = activation_func
         self.epsilon = epsilon
-        self.limit = limit
+        self.epochs = epochs
         self.max_it_same_bias = max_it_same_bias
         self.training_level = training_level
         self.filename = filename
@@ -113,7 +113,7 @@ class PerceptronExerciseTemplate(Exercise):
             'training': {
                 'params': {
                     'epsilon': self.epsilon,
-                    'limit': self.limit,
+                    'epochs': self.epochs,
                     'max_it_same_bias': self.max_it_same_bias,
                     'training_level': self.training_level
                 },
@@ -202,10 +202,10 @@ class SimplePerceptronExerciseTemplate(PerceptronExerciseTemplate):
 
         # train perceptron
         print("Started training")
-        result = simple_perceptron.train(X_train, y_train, self.epsilon, self.limit, self.max_it_same_bias)
+        result = simple_perceptron.train(X_train, y_train, self.epsilon, self.epochs, self.max_it_same_bias)
 
         if result:
-            print(f"LIMIT ({self.limit}) passed")
+            print(f"EPOCHS ({self.epochs}) passed")
             
         print("Finished training")
 
@@ -239,8 +239,8 @@ class SimplePerceptronExerciseTemplate(PerceptronExerciseTemplate):
 
 class MultilayerPerceptronExerciseTemplate(PerceptronExerciseTemplate):
 
-    def __init__(self, hidden_layers, activation_func, dx_activation_func, epsilon, limit, max_it_same_bias, training_level, filename):
-        super().__init__(activation_func, epsilon, limit, max_it_same_bias, training_level, filename)
+    def __init__(self, hidden_layers, activation_func, dx_activation_func, epsilon, epochs, max_it_same_bias, training_level, filename):
+        super().__init__(activation_func, epsilon, epochs, max_it_same_bias, training_level, filename)
         self.dx_activation_func = dx_activation_func
         self.hidden_layers = hidden_layers # las layers vienen en la forma [a, b, c, d...] donde cada letra representa las neuronas de cada capa
 
@@ -254,10 +254,10 @@ class MultilayerPerceptronExerciseTemplate(PerceptronExerciseTemplate):
        
         # train perceptron
         print("Started training")
-        result = neural_net.train(X_train, Y_train, self.epsilon, self.limit, self.max_it_same_bias)
+        result = neural_net.train(X_train, Y_train, self.epsilon, self.epochs, self.max_it_same_bias)
 
         if result:
-            print(f"LIMIT ({self.limit}) passed")
+            print(f"EPOCHS ({self.epochs}) passed")
             
         print("Finished training")
 
@@ -296,10 +296,10 @@ class Ej1And(SimplePerceptronExerciseTemplate):
 
     def __init__(self):
         epsilon = 0
-        limit = 100000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__(sign_activation, epsilon, limit, max_it_same_bias, training_level, ej1_and_filename)
+        super().__init__(sign_activation, epsilon, epochs, max_it_same_bias, training_level, ej1_and_filename)
 
     def get_data(self):
         X = np.array([
@@ -317,10 +317,10 @@ class Ej1Xor(SimplePerceptronExerciseTemplate):
 
     def __init__(self):
         epsilon = 0
-        limit = 100000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__(sign_activation, epsilon, limit, max_it_same_bias, training_level, ej1_xor_filename)
+        super().__init__(sign_activation, epsilon, epochs, max_it_same_bias, training_level, ej1_xor_filename)
 
     def get_data(self):
         X = np.array([
@@ -358,28 +358,28 @@ class Ej2Lineal(Ej2):
 
     def __init__(self):
         epsilon = .001
-        limit = 10000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__(lineal_activation, epsilon, limit, max_it_same_bias, training_level, ej2_lineal_filename)
+        super().__init__(lineal_activation, epsilon, epochs, max_it_same_bias, training_level, ej2_lineal_filename)
 
 class Ej2NoLineal(Ej2):
 
     def __init__(self):
         epsilon = .001
-        limit = 10000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__(tanh_activation, epsilon, limit, max_it_same_bias, training_level, ej2_no_lineal_filename)
+        super().__init__(tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej2_no_lineal_filename)
     
 class Ej2NoLinealWithTesting(Ej2):
 
     def __init__(self):
         epsilon = .001
-        limit = 10000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.03
-        super().__init__(tanh_activation, epsilon, limit, max_it_same_bias, training_level, ej2_no_lineal_with_testing_filename)
+        super().__init__(tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej2_no_lineal_with_testing_filename)
         self.training_pctg = .7
 
     def get_data(self):
@@ -407,10 +407,10 @@ class Ej3Xor(MultilayerPerceptronExerciseTemplate):
 
     def __init__(self):
         epsilon = .001
-        limit = 10000
+        epochs = 100
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__([3, 3, 3], tanh_activation, dx_tanh_activation, epsilon, limit, max_it_same_bias, training_level, ej3_xor_filename)
+        super().__init__([3, 3, 3], tanh_activation, dx_tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej3_xor_filename)
 
     def get_data(self):
         X = np.array([
@@ -428,11 +428,11 @@ class Ej3Pair(MultilayerPerceptronExerciseTemplate):
 
     def __init__(self):
         epsilon = .001
-        limit = 10000
+        epochs = 10000
         max_it_same_bias = 10000
         training_level = 0.01
         self.training_pctg = .5
-        super().__init__([3, 3, 3], tanh_activation, dx_tanh_activation, epsilon, limit, max_it_same_bias, training_level, ej3_pair_filename)
+        super().__init__([3, 3, 3], tanh_activation, dx_tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej3_pair_filename)
 
     def get_data(self):
         X = import_and_parse_numbers(ej3_pair_training)
