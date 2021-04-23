@@ -22,18 +22,42 @@ pip install -r requirements.txt
 
 ### Configuración
 
+Antes de ejectuar el programa, se debe modificar el archivo `config.yaml`.
+En este archivo se deben configurar la ubicaciones y los nombres de los sets de datos para los distintos ejercicios. Y tambien especificar si se desea graficar o no.
+
+A continuación, se muestra un ejemplo de la configuración:
+
+```yaml
+# data folder
+
+data_folder: data
+
+# data files
+
+# ej2
+ej2_training: ej2-Conjuntoentrenamiento.txt
+ej2_outputs: ej2-Salida-deseada.txt
+
+# ej3
+ej3_pair_training: ej3-mapa-de-pixeles-digitos-decimales.txt
+
+# plotting
+plotting: True
+```
+
 ### Ejecución
 
 Finalmente, para correr los distintos puntos del trabajo se debe ejecutar el comando:
 
 ```python
-python .\ej1.py
+python .\main.py
 ```
 
-```python
-python .\ej2.py
-```
+A continuación, se observarán un menú para la seleccion del ejercicio especificado.
 
-```python
-python .\ej3.py
-```
+En el menú de acciones se observarán dos opciones:
+
+* Train and Test: Se entrena a la neurona o red neuronal para aprenda. Al terminar, muestra los resultados del aprendizaje y guarda el estado de la neurona o red en un archivo almacenado en la carpeta `saves`. 
+
+* Predict: Utiliza los resultados de `saves` para permitir que se utilice la red para predecir resultados de puntos que no hayan sido analizados, ingresados por entrada estandar.
+
