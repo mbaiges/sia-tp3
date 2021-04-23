@@ -65,6 +65,48 @@ def calculate_standard_deviation(model, X, y):
     stdev = math.sqrt(stdev)
     return stdev
 
+def calculate_classification_metrics(model, X, y):
+    true_positives = 0
+    true_negatives = 0
+    false_positives = 0
+    false_negatives = 0
+
+    for i in range(0, X.shape[0]):
+        output = model.evaluate(X[i, :])
+        output = 1 if output >= 0 else -1
+
+        expected_output = y[i]
+    
+        # expected is positive
+        if expected_output == 1 :
+            # is true
+            if output == expected_output:
+                true_positives += 1
+            # is false
+            else:
+                false_negatives += 1
+        else:
+            # is true
+            if output == expected_output:
+                true_negatives += 1
+            # is false
+            else:
+                false_positives += 1
+
+    accuracy = (true_positives + true_negatives) / (true_positives + true_negatives + false_positives + false_negatives)
+    precision = (true_positives) / (true_positives + false_positives) if true_positives + false_positives != 0 else math.inf
+    recall = (true_positives) / (true_positives + false_negatives) if true_positives + false_negatives != 0 else math.inf
+    f1_score = (2 * precision * recall) / ( precision + recall ) if precision + recall != 0 else math.inf
+
+    res = {
+        'accuracy': accuracy,
+        'precision': precision,
+        'recall': recall,
+        'f1_score': f1_score
+    }
+
+    return res
+
 def print_predictions_with_expected(model, X, y):
     for i in range(0, X.shape[0]):
         print(f'X = {X[i,:]} => y = {model.evaluate(X[i,:])} (should return {y[i]})')

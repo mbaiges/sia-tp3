@@ -1,7 +1,7 @@
 import signal
 import sys
 
-from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting, Ej3Xor, Ej3Pair
+from exercises import Ej1And, Ej1Xor, Ej2Lineal, Ej2NoLineal, Ej2NoLinealWithTesting, Ej2NoLinealWithTestingCrossValidation, Ej3Xor, Ej3Pair, Ej3PairCrossValidation
 
 exercises = {
     'ej1': [
@@ -26,6 +26,10 @@ exercises = {
         {
             'name': 'No Lineal With Testing',
             'exercise': Ej2NoLinealWithTesting
+        },
+        {
+            'name': 'No Lineal With Testing (Cross Validation)',
+            'exercise': Ej2NoLinealWithTestingCrossValidation
         }
     ],
     'ej3': [
@@ -37,7 +41,10 @@ exercises = {
             'name': 'Pair',
             'exercise': Ej3Pair
         },
-        
+        {
+            'name': 'Pair (Cross Validation)',
+            'exercise': Ej3PairCrossValidation
+        }        
     ],
 }
 

@@ -13,10 +13,20 @@ plotting = False
 
 config_filename = 'config.yaml'
 
+# extra modes
+
+momentum = False
+momentum_alpha = 0.8
+
 with open(config_filename) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
+
     if 'plotting' in config:
         plotting = config['plotting']
+
+    if 'momentum' in config and 'opt' in config['momentum'] and 'alpha' in config['momentum']:
+        momentum = config['momentum']['opt']
+        momentum_alpha = config['momentum']['alpha']
 
 class SimplePerceptron:
 
@@ -89,7 +99,7 @@ class SimplePerceptron:
                 if error < self.min_error:
                     self.min_error = error
                     self.min_weights_and_bias = self.neuron.get_weights_and_bias()
-                    print('updated min_error', self.min_error)
+                    #print('updated min_error', self.min_error)
 
                 i += 1
                 n += 1
@@ -177,7 +187,7 @@ class MultilayerPerceptron:
                 if error < self.min_error:
                     self.min_error = error
                     self.min_weights_and_bias = self.neural_network.get_weights_and_bias()
-                    print('updated min_error', self.min_error)
+                    #print('updated min_error', self.min_error)
 
                 i += 1
                 n += 1
@@ -200,6 +210,10 @@ class Neuron:
         self.weights = weights
         self.bias = bias
         self.activation_func = activation_func
+        
+        if momentum:
+            self.last_delta_weights = None
+            self.last_delta_bias = None
 
     def apply_correction(self, learning_level, expected_result, result, entry):
         correction = learning_level * (expected_result - result)
@@ -208,6 +222,15 @@ class Neuron:
         #print(f'delta_weights: {delta_weights}')
         delta_bias = correction
         #print(f'Old weights: {self.weights}, bias: {self.bias}')
+        
+        if momentum:
+            if not self.last_delta_weights is None and not self.last_delta_bias is None:
+                delta_weights = delta_weights + momentum_alpha * self.last_delta_weights
+                delta_bias = delta_bias + momentum_alpha * self.last_delta_bias
+
+            self.last_delta_weights = delta_weights
+            self.last_delta_bias = delta_bias
+        
         self.weights += delta_weights
         self.bias += delta_bias
         #print(f'New weights: {self.weights}, bias: {self.bias}')
@@ -260,7 +283,7 @@ class NeuralNetwork:
             self.__init__2(args[0], args[1], args[2], args[3], args[4], args[5])
 
     def __init__1(self, hidden_layers, X_shape, Y_shape, activation_func, dx_activation_func):
-        print(f'Hidden layers: hidden_layers')
+        # print(f'Hidden layers: {hidden_layers}')
         # print(X_shape)
         self.hidden_layers = hidden_layers
         self.X_shape = X_shape

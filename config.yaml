@@ -12,5 +12,10 @@ ej2_outputs: ej2-Salida-deseada.txt
 # ej3
 ej3_pair_training: ej3-mapa-de-pixeles-digitos-decimales.txt
 
+# extra modes
+momentum:
+  opt: False
+  alpha: 0.8
+
 # plotting
 plotting: True
