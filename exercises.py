@@ -635,6 +635,23 @@ class Ej3Pair(MultilayerPerceptronExerciseTemplate):
 
         return X_train, y_train, X_test, y_test
 
+    def get_analysis_results(self, perceptron, X, y):
+        best_model = perceptron.get_best_model()
+
+        abs_error = calculate_abs_error(best_model, X, y)
+        mean_error = calculate_mean_error(best_model, X, y)
+        standard_deviation = calculate_standard_deviation(best_model, X, y)
+        class_metrics = calculate_classification_metrics(best_model, X, y)
+
+        results = {
+            'abs_error': float(abs_error),
+            'mean_error': float(mean_error),
+            'standard_deviation': float(standard_deviation),
+            'classification_metrics': class_metrics
+        }
+
+        return results
+
     def build_results(self, perceptron, training_results, testing_results):
         results = super().build_results(perceptron, training_results, testing_results)
 

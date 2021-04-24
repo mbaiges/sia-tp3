@@ -17,7 +17,7 @@ def import_and_parse_data(file):
 def import_and_parse_numbers(file):
     rows = import_and_parse_data(file)
 
-    print(rows)
+    # print(rows)
 
     data = []
 
@@ -26,7 +26,7 @@ def import_and_parse_numbers(file):
     for i in range(0, rows.shape[0]):
         row = rows[i]
         if i > 0 and i % 7 == 0:
-            print(f"Curr: {curr}")
+            # print(f"Curr: {curr}")
             data.append(curr)
             curr = []
             
@@ -34,10 +34,10 @@ def import_and_parse_numbers(file):
         
         i += 1
 
-    print(f"Curr: {curr}")
+    # print(f"Curr: {curr}")
     data.append(curr)
 
-    print(np.array(data))
+    # print(np.array(data))
 
     return np.array(data)
 

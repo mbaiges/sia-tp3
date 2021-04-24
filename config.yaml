@@ -18,4 +18,4 @@ momentum:
   alpha: 0.8
 
 # plotting
-plotting: True
+plotting: False
