@@ -23,11 +23,12 @@ pip install -r requirements.txt
 ### Configuración
 
 Antes de ejectuar el programa, se debe modificar el archivo `config.yaml`.
-En este archivo se deben configurar la ubicaciones y los nombres de los sets de datos para los distintos ejercicios. Y tambien especificar si se desea graficar o no.
+En este archivo se deben configurar la ubicaciones y los nombres de los sets de datos para los distintos ejercicios. Tambien especificar si se desea graficar o no y si se desea que la red utilice momentum y de ser así, cuanto porcentaje usar.
 
 A continuación, se muestra un ejemplo de la configuración:
 
 ```yaml
+
 # data folder
 
 data_folder: data
@@ -41,8 +42,14 @@ ej2_outputs: ej2-Salida-deseada.txt
 # ej3
 ej3_pair_training: ej3-mapa-de-pixeles-digitos-decimales.txt
 
+# extra modes
+momentum:
+  opt: False
+  alpha: 0.8
+
 # plotting
-plotting: True
+plotting: False
+
 ```
 
 ### Ejecución
