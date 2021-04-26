@@ -173,7 +173,7 @@ class PerceptronExerciseTemplate(Exercise):
                 wants_to_keep_predicting = False if inp == '' else True
 
                 if wants_to_keep_predicting:
-                    if re.match('^\[[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*(,[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*)*\]$', inp):
+                    if re.match('^\[[ \t]*-?[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*(,[ \t]*-?[ \t]*((\.[0-9]+)|([0-9]+(\.[0-9]*)?))[ \t]*)*\]$', inp):
                         try:
                             selected_X = ast.literal_eval(inp)
                             error = False if isinstance(selected_X, list) else True
@@ -591,11 +591,12 @@ class Ej2NoLinealWithTestingCrossValidation(Ej2):
 class Ej3Xor(MultilayerPerceptronExerciseTemplate):
 
     def __init__(self):
+        hidden_layers = [3, 3, 3]
         epsilon = .001
-        epochs = 100
+        epochs = 2500
         max_it_same_bias = 10000
         training_level = 0.01
-        super().__init__([3, 3, 3], tanh_activation, dx_tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej3_xor_filename)
+        super().__init__(hidden_layers, tanh_activation, dx_tanh_activation, epsilon, epochs, max_it_same_bias, training_level, ej3_xor_filename)
 
     def get_data(self):
         X = np.array([
